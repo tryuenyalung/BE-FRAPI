@@ -1,7 +1,6 @@
+import UserRoute from './UserRoute'
 
-
-export default class Routes {
-    constructor(app) {
-        app.use("api/v1/route", someRoutes)
-    }   
+export default (app) =>  {
+    app.use("/api/v1/users", UserRoute)
 }
+ 

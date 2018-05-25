@@ -1,10 +1,15 @@
 import express from 'express' 
-import Server from './configs/Server'
+import keys from './keys';
+import AppServer from './configs/AppServer'
 import ExpressValidator from './configs/ExpressValidator'
 import BodyParser from './configs/BodyParser'
+import MongoDB from './configs/MongoDB'
+import Routes from './routes/Routes'
 
 const app = express()
-
-new Server(app)
-new ExpressValidator(app)
-new BodyParser(app)
+    AppServer(app)
+    MongoDB()
+    ExpressValidator(app)
+    BodyParser(app)
+    Routes(app)
+app.get('*', (req, res) => res.status(404).send(keys.ERR_MSG) )
