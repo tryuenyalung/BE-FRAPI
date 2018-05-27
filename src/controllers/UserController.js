@@ -28,12 +28,20 @@ export const findUserById =(req, res)=> {
 
 //update one by id
 export const updateUser =(req, res)=> {
-    Users.findOneAndUpdate(
-        { _id: req.params.id }, 
-        { $set: [name, author, volume] = [req.body.name, req.body.author, req.body.volume] }, 
+    const id = { _id: req.params.id }
+
+    const body =  { $set: {
+        name: req.body.name,
+        address: req.body.address,
+        dateOfBirth: req.body.dateOfBirth,
+        gender: req.body.gender 
+    }, $inc: {__v: 1} }
+
+    Users.findByIdAndUpdate(
+        id,  body, 
         { upsert: true },
         (err, data) => {
-            err ? console.error(err) : res.send("success")
+            err ? res.send(err) : res.send(data)
         })
 }//@end
 

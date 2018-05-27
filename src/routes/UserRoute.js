@@ -19,10 +19,10 @@ router.post(
         UserController.addUser
 )
 
-// router.put(
-//     '/:id', 
-//     usersController.method
-// )
+router.put(
+    '/:id', 
+    UserController.updateUser
+)
 
 // router.delete(
 //     '/:id',
