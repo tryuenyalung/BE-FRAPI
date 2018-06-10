@@ -1,15 +1,49 @@
 import Users from './../schemas/Users'
+import bcrypt from 'bcrypt'
+
+const saltRounds = 10
+
 
 //create data
 export const addUser =(req, res)=> {
-    Users.create(req.body, (err, data) => 
-        (err) ? console.error(err) : res.status(201).send(data)
-    )
+    //check if username already exist
+    Users.findOne( {username : req.body.username} , (err, userData) => {
+        
+        if(userData !== {}){//check if the return data is empty
+            res.send({message : `username: ${req.body.username} already exist`})
+        }else{
+            //hash the password 
+            bcrypt.hash(req.body.password, saltRounds).then( (hashedPassword) => {
+                //update the password the req.body
+                let userData = Object.assign( req.body, {password: hashedPassword} )
+
+                Users.create(userData, (err, data) => 
+                    err ? res.status(422).send(err) : res.status(201).send(data)
+                )
+            })//bcrypt
+
+        }//else
+
+    })//findOne
+    
 }//@end
+
+//get user list with pagination
+export const paginatedUser =(req, res, next)=> {
+    if( isNaN(req.query.page) ){ 
+        next() 
+    }else{
+        Users.paginate({}, { page: req.query.page, limit: 10 }, (err, data) =>{
+            err ? res.status(500).send(err) : res.send(data) 
+        })
+    }
+    
+}//@end
+
 
 //read all data
 export const findAllUsers =(req, res)=> {
-    Users.find({}, (err, data) => err ? console.error(err) : res.send(data) ) 
+    Users.find({}, (err, data) => err ? res.status(500).send(err) : res.send(data) ) 
 }//@end
 
 
@@ -17,39 +51,34 @@ export const findAllUsers =(req, res)=> {
 export const findUserById =(req, res)=> {
     Users.findById(req.params.id).exec( (err, data) =>{
         if(err){
-            res.status(500).send({message : `no data found at id : ${req.params.id}`})
-            console.error(err)
+            res.status(500).send({message : `no user found at id : ${req.params.id}`})
         }else{
             (data !== null) ? res.send(data) :
-            res.status(404).send( {code:404, status:"NOT FOUND", message:"no data found"} )
+            res.status(404).send( {message : `no user found at id : ${req.params.id}`} )
         }
     })
 }//@end
 
 //update one by id
 export const updateUser =(req, res)=> {
-    const id = { _id: req.params.id }
+    const id = req.params.id;
 
-    const body =  { $set: {
-        name: req.body.name,
-        address: req.body.address,
-        dateOfBirth: req.body.dateOfBirth,
-        gender: req.body.gender 
-    }, $inc: {__v: 1} }
+    Users.findById(id, (err, data) =>{//fetch the data from id
+        if(err){
+            res.status(404).send( {message : `no user found at id : ${req.params.id}`} )
+        }else{
+            const body = Object.assign( data, req.body )//overwrite the data 
+            body.save( (err, data) =>  err ? res.send(err) : res.send(data) )//update the data from db
+        }//else
 
-    Users.findByIdAndUpdate(
-        id,  body, 
-        { upsert: true },
-        (err, data) => {
-            err ? res.send(err) : res.send(data)
-        })
+    })
+    
 }//@end
 
 //delete one data by id
 export const deleteUser =(req, res)=> {
-    Users.findOneAndRemove(
-        { _id: req.params.id }, 
-        (err, data) =>{
-            err ? console.error(err) : res.send("success")
-        })
+    Users.findOneAndRemove({ _id: req.params.id },(err, data) =>{
+            err ? res.status(404).send( {message : `no user found at id : ${req.params.id}`} ) 
+            : res.status(200).send( {message : `user deleted at id : ${req.params.id}`} )
+    })
 }//@end

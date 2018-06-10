@@ -18,8 +18,11 @@ const getBucket =(fileType)=> {
 
 // stores the file to a specific bucket from the bucketlist
 const storage = new GridFsStorage({
+
     url: mlab,
+
     file: (req, file) => {
+      
       return new Promise((resolve, reject) => {
         
         // create unique filename

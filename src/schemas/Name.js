@@ -1,18 +1,22 @@
 import mongoose from 'mongoose'
 
+const options = {
+    _id : false 
+}
+
+const reqStr = {
+    type: String,
+    required: true
+}
+
 let Name = mongoose.Schema({
-    firstName:{
-        type: String,
-        require: true
-    },
-    middleName: {
-        type: String,
-        require: true
-    },
-    lastName: {
-        type: String,
-        require: true
-    } 
-},{ _id : false })
-// mongoose.model(tableName, exportName)
+
+    first_name: reqStr,
+
+    middle_name: reqStr,
+
+    last_name: reqStr 
+
+}, options)
+
 export default Name

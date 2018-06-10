@@ -7,20 +7,20 @@ export const validateObjectId =(req, res, next)=> {
 }//@end
 
 export const validateUsers =(req, res, next)=> {
-    req.checkBody('name.firstName', 'first name is required').notEmpty()
-    req.checkBody('name.middleName', 'middle name is required').notEmpty()
-    req.checkBody('name.lastName', 'last name is required').notEmpty()
+    req.checkBody('name.first_name', 'first name is required').notEmpty()
+    req.checkBody('name.middle_name', 'middle name is required').notEmpty()
+    req.checkBody('name.last_name', 'last name is required').notEmpty()
 
     req.checkBody('gender', 'use male / female only').isIn(['male', 'female'])
 
     req.checkBody('dateOfBirth', 'date of birth is required').notEmpty()
     // req.checkBody('dateofbirth', 'must be a valid date').isDate()
     
-    req.checkBody('address.street', 'street is required').notEmpty()
-    req.checkBody('address.barangay', 'barangay is required').notEmpty()
-    req.checkBody('address.municipality', 'municipality is required').notEmpty()
-    req.checkBody('address.province', 'province is required').notEmpty()
+    req.checkBody('address', 'address is required').notEmpty()
+    req.checkBody('department', 'department is required').notEmpty()
+    req.checkBody('position', 'position is required').notEmpty()
+
     
     let errors = req.validationErrors()
-    errors ? res.send({ "errors": errors.map(x =>  `{${x.param} : ${x.msg}}` ) }) : next()
+    errors ? res.status(422).send({ "errors": errors.map(x =>  `{${x.param} : ${x.msg}}` ) }) : next()
 }//@end
