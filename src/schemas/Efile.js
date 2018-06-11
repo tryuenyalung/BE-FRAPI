@@ -1,0 +1,47 @@
+import mongoose from 'mongoose'
+import mongoosePaginate from 'mongoose-paginate'
+
+//adding createdAt and updatedAt field
+const timestamps = {
+    createdAt: 'created_at',
+    updatedAt: 'update_at'
+}
+
+//required string
+const reqStr = {
+    type: String,
+    required: true
+}
+
+let Efile = mongoose.Schema({
+
+    name: reqStr,
+
+    content: reqStr,
+
+    recipient:{ type: Array },
+
+    pending_recipient:{ type: Array },
+    
+    approved_recipient:{ type: Array },
+
+    rejected_recipient:{ type: String },
+
+    signatures:{ type: String },
+
+    sender:{ type: String },
+
+    publish:{ 
+        type: Boolean,
+        default: false
+    },
+
+    rejection_reason:{ type: String }
+
+}, { timestamps })
+
+//adding pagination plugin for mongoose
+Efile.plugin(mongoosePaginate)
+
+// mongoose.model(documentName, exportName)
+export default mongoose.model("efiles", Efile)

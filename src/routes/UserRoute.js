@@ -2,6 +2,7 @@ import express from 'express'
 import * as UserController from './../controllers/UserController'
 import * as AuthController from './../controllers/AuthController'
 import * as UserValidator from './../validators/UserValidator'
+import * as GenericValidator from './../validators/GenericValidator'
 
 
 const router = express.Router()
@@ -12,12 +13,16 @@ router.get('/',
     UserController.findAllUsers
 )
 
+router.get('/:id', 
+    GenericValidator.validateObjectId,
+    UserController.findUserById
+)
+
 router.get('/search', 
     UserValidator.validateQueryString,
     UserController.searchQuery
 )
           
-
 router.post("/",
     UserValidator.validateUsers,// validates the req body
     UserController.addUser
@@ -28,12 +33,12 @@ router.post("/login",
 )
 
 router.put('/:id', 
-    UserValidator.validateObjectId,
+    GenericValidator.validateObjectId,
     UserController.updateUser
 )
 
 router.delete('/:id', 
-    UserValidator.validateObjectId,
+    GenericValidator.validateObjectId,
     UserController.deleteUser
 )
 
