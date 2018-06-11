@@ -47,6 +47,7 @@ let Users = mongoose.Schema({
 
 }, { timestamps })
 
+
 //adding pagination plugin for mongoose
 Users.plugin(mongoosePaginate)
 

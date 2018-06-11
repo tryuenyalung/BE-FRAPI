@@ -11,6 +11,11 @@ router.get('/',
     UserController.paginatedUser, //check if it has query page=number
     UserController.findAllUsers
 )
+
+router.get('/search', 
+    UserValidator.validateQueryString,
+    UserController.searchQuery
+)
           
 
 router.post("/",
@@ -22,13 +27,13 @@ router.post("/login",
     AuthController.authUser
 )
 
-router.put(
-    '/:id', 
+router.put('/:id', 
+    UserValidator.validateObjectId,
     UserController.updateUser
 )
 
-router.delete(
-    '/:id', 
+router.delete('/:id', 
+    UserValidator.validateObjectId,
     UserController.deleteUser
 )
 
