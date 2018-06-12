@@ -1,5 +1,8 @@
+import Joi from 'joi';
+
+Joi.objectId = require('joi-objectid')(Joi)
+
 export const validateObjectId =(req, res, next)=> {
-    req.checkParams(req.params.id, `id must an object id!`).isMongoId()
-    let errors = req.validationErrors()
-    errors ? res.send({ "errors": errors.map(x => x.msg) }) : next()
+    const err = Joi.validate(req.params.id, Joi.objectId().error(Error("invalid object id")) )
+    err.error !== null ? res.status(422).send({errors: err.error.message }) : next()
 }//@end

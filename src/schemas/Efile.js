@@ -12,6 +12,10 @@ const reqStr = {
     type: String,
     required: true
 }
+const strNull = {
+    type: String,
+    default: null
+}
 
 let Efile = mongoose.Schema({
 
@@ -25,9 +29,9 @@ let Efile = mongoose.Schema({
     
     approved_recipient:{ type: Array },
 
-    rejected_recipient:{ type: String },
+    rejected_recipient: strNull,
 
-    signatures:{ type: String },
+    signatures: strNull,
 
     sender:{ type: String },
 
@@ -36,12 +40,18 @@ let Efile = mongoose.Schema({
         default: false
     },
 
-    rejection_reason:{ type: String }
+    private_doc:{ //true for private , false for public 
+        type: Boolean
+    },
+
+    rejection_reason: strNull
 
 }, { timestamps })
 
 //adding pagination plugin for mongoose
 Efile.plugin(mongoosePaginate)
+
+
 
 // mongoose.model(documentName, exportName)
 export default mongoose.model("efiles", Efile)

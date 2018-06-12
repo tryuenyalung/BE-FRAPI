@@ -1,46 +1,42 @@
+import Joi from 'joi'
 
-export const validateObjectId =(req, res, next)=> {
-    req.checkParams(req.params.id, `id must an object id!`).isMongoId()
-    let errors = req.validationErrors()
-    errors ? res.send({ "errors": errors.map(x => x.msg) }) : next()
-}//@end
+const postReqValidator = Joi.object().keys({
+    username: Joi.string().required(),
+    password: Joi.string().required(),
+    name: {
+        first_name : Joi.string().required(),
+        middle_name : Joi.string().required(),
+        last_name : Joi.string().required()
+    },
+    gender: Joi.string().valid('male', 'female').required(),
+    dateOfBirth: Joi.array().required(),
+    address: Joi.array().required(),
+    department: Joi.string().required(),
+    position: Joi.string().required()
+})
+
 
 export const validateUsers =(req, res, next)=> {
-    req.checkBody('username', 'username is required').notEmpty()
-    req.checkBody('password', 'password is required').notEmpty()
-
-    req.checkBody('name.first_name', 'first name is required').notEmpty()
-    req.checkBody('name.middle_name', 'middle name is required').notEmpty()
-    req.checkBody('name.last_name', 'last name is required').notEmpty()
-
-    req.checkBody('gender', 'use male / female only').isIn(['male', 'female'])
-
-    req.checkBody('dateOfBirth', 'date of birth is required').notEmpty()
-    // req.checkBody('dateofbirth', 'must be a valid date').isDate()
-    
-    req.checkBody('address', 'address is required').notEmpty()
-    req.checkBody('department', 'department is required').notEmpty()
-    req.checkBody('position', 'position is required').notEmpty()
-
-    
-    let errors = req.validationErrors()
-    errors ? res.status(422).send({ "errors": errors.map(x =>  `{${x.param} : ${x.msg}}` ) }) : next()
+    const err = Joi.validate(req.body, postReqValidator, {abortEarly: false} )
+    err ? res.status(422).send({errors: (err.error.details).map(x => x.message) }) : next()
 }//@end
 
 
 export const validateQueryString =(req, res, next)=> {
     //checking query strings, all are not required
     if(req.query.gender){
-        req.checkQuery('gender', 'use male or female only').isIn(['male', 'female'])
+        const err = Joi.validate(req.query.gender, Joi.string().valid('male', 'female').error(Error("gender must be either male or female only")) )
+        err.error !== null ? res.status(422).send({errors: err.error.message }) : next()
     }
-    if(req.query.name){
-        req.checkQuery('name', 'theres no name with numeric value').isAlpha()
+    else if(req.query.name){
+        const err = Joi.validate(req.query.name, Joi.string())
+        err.error !== null ? res.status(422).send({errors: err.error.message }) : next()
     }
-    if(req.query.status){
-        req.checkQuery('status', 'use \'y\' for true and \'n\' for false').isIn(['y', 'n'])
+   else if(req.query.status){
+        const err = Joi.validate(req.query.status, Joi.string().valid('y', 'n').error(Error("status must be either y(true) or n(false) only")) )
+        err.error !== null ? res.status(422).send({errors: err.error.message }) : next()
+    }else{
+        next()
     }
-
-    let errors = req.validationErrors()
-    errors ? res.status(422).send({ "errors": errors.map(x =>  `{\'${x.param}\' : \'${x.msg}\' } ` ) }) : next()
 
 }//@end

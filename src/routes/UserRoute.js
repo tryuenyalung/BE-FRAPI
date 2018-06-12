@@ -7,22 +7,21 @@ import * as GenericValidator from './../validators/GenericValidator'
 
 const router = express.Router()
 
- 
 router.get('/', 
     UserController.paginatedUser, //check if it has query page=number
     UserController.findAllUsers
-)
-
-router.get('/:id', 
-    GenericValidator.validateObjectId,
-    UserController.findUserById
 )
 
 router.get('/search', 
     UserValidator.validateQueryString,
     UserController.searchQuery
 )
-          
+
+router.get('/:id', 
+    GenericValidator.validateObjectId,
+    UserController.findUserById
+)
+ 
 router.post("/",
     UserValidator.validateUsers,// validates the req body
     UserController.addUser
