@@ -33,7 +33,7 @@ let Efile = mongoose.Schema({
 
     signatures: strNull,
 
-    sender:{ type: String },
+    sender:{ type: Object },
 
     publish:{ 
         type: Boolean,

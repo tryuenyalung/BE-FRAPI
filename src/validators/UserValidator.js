@@ -9,16 +9,17 @@ const postReqValidator = Joi.object().keys({
         last_name : Joi.string().required()
     },
     gender: Joi.string().valid('male', 'female').required(),
-    dateOfBirth: Joi.array().required(),
-    address: Joi.array().required(),
+    dateOfBirth: Joi.string().required(),
+    address: Joi.string().required(),
     department: Joi.string().required(),
     position: Joi.string().required()
 })
 
 
 export const validateUsers =(req, res, next)=> {
-    const err = Joi.validate(req.body, postReqValidator, {abortEarly: false} )
-    err ? res.status(422).send({errors: (err.error.details).map(x => x.message) }) : next()
+    let err = Joi.validate(req.body, postReqValidator, {abortEarly: false} )
+    // {errors: (err.error.details).map(x => x.message) }
+    err.error !== null ? res.status(422).send({errors: (err.error.details).map(x => x.message) }) : next()
 }//@end
 
 

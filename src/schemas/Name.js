@@ -4,18 +4,22 @@ const options = {
     _id : false 
 }
 
-const reqStr = {
-    type: String,
-    required: true
-}
-
 let Name = mongoose.Schema({
 
-    first_name: reqStr,
+    first_name: {
+        type: String,
+        required : [true, "User Schema: first_name is required"]
+    },
 
-    middle_name: reqStr,
+    middle_name: {
+        type: String,
+        required : [true, "User Schema: middlea_name is required"]
+    },
 
-    last_name: reqStr 
+    last_name: {
+        type: String,
+        required : [true, "User Schema: last_name is required"]
+    }
 
 }, options)
 

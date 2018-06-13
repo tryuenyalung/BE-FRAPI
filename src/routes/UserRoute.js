@@ -17,8 +17,8 @@ router.get('/search',
     UserController.searchQuery
 )
 
-router.get('/:id', 
-    GenericValidator.validateObjectId,
+router.get('/:userId', 
+    // GenericValidator.validateObjectId,
     UserController.findUserById
 )
  
@@ -31,13 +31,13 @@ router.post("/login",
     AuthController.authUser
 )
 
-router.put('/:id', 
-    GenericValidator.validateObjectId,
+router.put('/:userId', 
+    // GenericValidator.validateObjectId,
     UserController.updateUser
 )
 
-router.delete('/:id', 
-    GenericValidator.validateObjectId,
+router.delete('/:userId', 
+    // GenericValidator.validateObjectId,
     UserController.deleteUser
 )
 

@@ -22,36 +22,58 @@ export const findAllEfiles =(req, res)=> {
 //read all data
 export const findAllPendingEfileById =(req, res)=> {
     //search all pending efile that a specific user has, disregard content
-    const searchObj = { "pending_recipient.0.id" :  req.params.id } 
+    const searchObj = { "pending_recipient.0.id" :  req.params.userId } 
     let pageInput = req.query.page
     paginatedSearch(searchObj, pageInput, res)
 }//@end
 
 //read all data
 export const findAllPublicPublishedEfile =(req, res)=> {
-    Efile.paginate( Efile.find({private_doc : false, publish: true}, '-content') ,{ page: req.query.page, limit: 10 }, (err, data) =>{
-        err ? res.status(500).send(err) : res.send(data) 
-    })
+    const searchObj = {
+        private_doc : false, 
+        publish: true
+    }
+    const pageInput = req.query.page
+    paginatedSearch(searchObj, pageInput, res)
 }//@end
 
 //read all data
-export const findAllPrivatePublishedEfile =(req, res)=> {
+export const findAllRejectedEfileByUserId =(req, res)=> {
+    const user_id = req.params.userId
+    // find all rejected efiles where the sender is you
+    const searchObj = {
+        'sender.id': user_id, 
+        $where: "this.rejected_recipient !==  null"
+    }
+    const pageInput = req.query.page
+    paginatedSearch(searchObj, pageInput, res)
+}//@end
+
+//read all data
+export const findAllPrivatePublishedEfileByUserId =(req, res)=> {
     const user_id = req.params.userId
     const pageInput = req.query.page
     
     const searchObj ={//find all private efile that has been published that you have access
-        private_doc: true,
-        publish: true,
-        recipient :{
-            $elemMatch:{//any record on arrays of object containing the id will be displayed
-                id : user_id
-            }
-        },
-        sender:{
-            id : user_id
-        }
-        //put sender object
-    }
+        private_doc: true,//it is a private doc
+        publish: true,// it is published
+        //should get all the published private efile if the user is either the sender or recipient
+        $or: [
+            { 
+                recipient: { 
+                    $elemMatch:{
+                        //any record on arrays of object containing the id will be displayed
+                        id : user_id
+                    }
+                } 
+            },
+            
+            
+            { 
+                'sender.id': user_id
+            } 
+        ]//or
+    }//sender object
     
     paginatedSearch(searchObj, pageInput, res)
 }//@end
@@ -69,19 +91,20 @@ export const paginatedEfile =(req, res, next)=> {
 
 //read one data
 export const findEfileById =(req, res)=> {
-    Efile.findById(req.params.id).exec( (err, data) =>{
+    const id = req.params.efileId
+    Efile.findById(id).exec( (err, data) =>{
         if(err){
-            res.status(500).send({message : `no user found at id : ${req.params.id}`})
+            res.status(500).send({message : `no user found at id : ${id}`})
         }else{
             (data !== null) ? res.send(data) :
-            res.status(404).send( {message : `no user found at id : ${req.params.id}`} )
+            res.status(404).send( {message : `no user found at id : ${id}`} )
         }
     })
 }//@end
 
 //update one by id
 export const updateEfile =(req, res)=> {
-    const id = req.params.id
+    const id = req.params.efileId
 
     Efile.findById(id, (err, data) =>{//fetch the data from id
         if(err){
@@ -96,10 +119,9 @@ export const updateEfile =(req, res)=> {
 }//@end
 
 //approve efile
+//this needs to be refactor
 export const approveEfile =(req, res)=> {
-    const id = req.params.id
-    
- 
+    const id = req.params.efileId
     
     Efile.findById(id, (err, data) =>{//fetch the data from id
         if(err){
@@ -135,11 +157,8 @@ export const approveEfile =(req, res)=> {
                     const body = Object.assign( data, updated_recipients )//overwrite the data 
                     body.save( (err, data) =>  err ? res.send(err) : res.send(data) )//update the data from db
                 }//else
-            }
+            }//else
     
-            
-    
-            
         }//else
     
     }
@@ -150,9 +169,10 @@ export const approveEfile =(req, res)=> {
 
 //delete one data by id
 export const deleteEfile =(req, res)=> {
-    Efile.findOneAndRemove({ _id: req.params.id },(err, data) =>{
-        err ? res.status(404).send( {message : `no user found at id : ${req.params.id}`} ) 
-        : res.status(200).send( {message : `user deleted at id : ${req.params.id}`} )
+    const id = req.params.efileId
+    Efile.findOneAndRemove({ _id: id },(err, data) =>{
+        err ? res.status(404).send( {message : `no user found at id : ${id}`} ) 
+        : res.status(200).send( {message : `user deleted at id : ${id}`} )
     })
 }//@end
 

@@ -9,17 +9,17 @@ const timestamps = {
     updatedAt: 'update_at'
 }
 
-//required string
-const reqStr = {
-    type: String,
-    required: true
-}
-
 let Users = mongoose.Schema({
 
-    username: reqStr,
+    username:  {
+        type: String,
+        required : [true, "User Schema: username is required"]
+    },
 
-    password: reqStr,
+    password: {
+        type: String,
+        required : [true, "User Schema: password is required"]
+    },
 
     avatar:{
         type: String,
@@ -28,17 +28,39 @@ let Users = mongoose.Schema({
 
     name : Name,
 
-    gender: reqStr,
+    gender: {
+        type: String,
+        enum: {
+            values: ['male', 'female'], 
+            message: 'User Schema: gender must only be male or female'
+        },
+        required : [true, "User Schema: gender is required"]
+    },
 
-    dateOfBirth: reqStr,
+    dateOfBirth:  {
+        type: String,
+        required : [true, "User Schema: dateOfBirth is required"]
+    },
 
-    address: reqStr,
+    address:  {
+        type: String,
+        required : [true, "User Schema: address is required"]
+    },
 
-    department: reqStr,
+    department:  {
+        type: String,
+        required : [true, "User Schema: department is required"]
+    },
 
-    position: reqStr,
+    position:  {
+        type: String,
+        required : [true, "User Schema: position is required"]
+    },
 
-    signature: reqStr,
+    signature: {
+        type: String,
+        required : false
+    },
 
     status:{
         type: Boolean,

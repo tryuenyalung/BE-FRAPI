@@ -4,7 +4,7 @@ const postReqValidator = Joi.object().keys({
     name: Joi.string().required(),
     content: Joi.string().required(),
     recipient: Joi.array().required(),
-    sender: Joi.string().required(),
+    sender: Joi.object().required(),
     private_doc: Joi.boolean().required() 
 })
 

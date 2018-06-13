@@ -47,19 +47,20 @@ export const findAllUsers =(req, res)=> {
 
 //read one data
 export const findUserById =(req, res)=> {
-    Users.findById(req.params.id).exec( (err, data) =>{
+    const id = req.params.userId
+    Users.findById(id).exec( (err, data) =>{
         if(err){
-            res.status(500).send({message : `no user found at id : ${req.params.id}`})
+            res.status(500).send({message : `no user found at id : ${id}`})
         }else{
             (data !== null) ? res.send(data) :
-            res.status(404).send( {message : `no user found at id : ${req.params.id}`} )
+            res.status(404).send( {message : `no user found at id : ${id}`} )
         }
     })
 }//@end
 
 //update one by id
 export const updateUser =(req, res)=> {
-    const id = req.params.id;
+    const id = req.params.userId;
 
     Users.findById(id, (err, data) =>{//fetch the data from id
         if(err){
@@ -75,9 +76,10 @@ export const updateUser =(req, res)=> {
 
 //delete one data by id
 export const deleteUser =(req, res)=> {
-    Users.findOneAndRemove({ _id: req.params.id },(err, data) =>{
-            err ? res.status(404).send( {message : `no user found at id : ${req.params.id}`} ) 
-            : res.status(200).send( {message : `user deleted at id : ${req.params.id}`} )
+    const id = req.params.userId
+    Users.findOneAndRemove({ _id: id },(err, data) =>{
+            err ? res.status(404).send( {message : `no user found at id : ${id}`} ) 
+            : res.status(200).send( {message : `user deleted at id : ${id}`} )
     })
 }//@end
 

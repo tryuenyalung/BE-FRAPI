@@ -13,14 +13,14 @@ router.get('/',
     EfileController.findAllEfiles
 )
 
-router.get('/:id', 
-    GenericValidator.validateObjectId,
+router.get('/:efileId', 
+    // GenericValidator.validateObjectId,
     EfileController.findEfileById
 )
  
  
 //find all the pending recipients for specific user
-router.get('/pending/:id', 
+router.get('/pending/:userId', 
     EfileController.findAllPendingEfileById
 )
 
@@ -29,25 +29,29 @@ router.get('/published/public',
     EfileController.findAllPublicPublishedEfile
 )
 
-
-router.get('/published/private/user/:userId', 
-    EfileController.findAllPrivatePublishedEfile
+//find all rejected efile the user has
+router.get('/rejected/:userId', 
+    EfileController.findAllRejectedEfileByUserId
 )
 
-//approve the efile
-router.get('/approve/:id', 
+router.get('/published/private/user/:userId', 
+    EfileController.findAllPrivatePublishedEfileByUserId
+)
+
+// approve the efile
+router.get('/approve/:efileId', 
     EfileController.approveEfile
 )
 
 // jwt in the interceptor
-router.post('/reject/:efileId', 
+// router.post('/reject/:efileId', 
    
-)
+// )
 
 // jwt in the interceptor
-router.get('/publish/:efileId', 
+// router.get('/publish/:efileId', 
    
-)
+// )
 
 
 
@@ -63,13 +67,13 @@ router.post("/",
     EfileController.createEfile
 )
 
-router.put('/:id', 
-    GenericValidator.validateObjectId,
+router.put('/:efileId', 
+    // GenericValidator.validateObjectId,
     EfileController.updateEfile
 )
 
-router.delete('/:id', 
-    GenericValidator.validateObjectId,
+router.delete('/:efileId', 
+    // GenericValidator.validateObjectId,
     EfileController.deleteEfile
 )
 
