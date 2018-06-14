@@ -12,7 +12,8 @@ const postReqValidator = Joi.object().keys({
     dateOfBirth: Joi.string().required(),
     address: Joi.string().required(),
     department: Joi.string().required(),
-    position: Joi.string().required()
+    position: Joi.string().required(),
+    signature: Joi.string().required()
 })
 
 

@@ -59,7 +59,7 @@ let Users = mongoose.Schema({
 
     signature: {
         type: String,
-        required : false
+        required : [true, "User Schema: signature is required"]
     },
 
     status:{
