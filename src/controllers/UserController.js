@@ -9,7 +9,7 @@ export const addUser =(req, res)=> {
     Users.findOne( {username : req.body.username} , (err, userData) => {
         
         if(userData !== null){//check if the return data is empty
-            res.send({message : `username: ${req.body.username} already exist`})
+            res.status(400).send({errors : `username: ${req.body.username} already exist`})
         }else{
             //hash the password 
             bcrypt.hash(req.body.password, saltRounds).then( (hashedPassword) => {
