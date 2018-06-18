@@ -28,7 +28,7 @@ export const authUser =(req, res)=> {
 
                 const cbCheckPassword =(err, isPasswordValid) => {// check if password valid and send token
                     !isPasswordValid ? res.status(401).send({errors : "invalid password"}) 
-                    :jwt.sign( {id : userData._id} , keys.SECRET, cbSendToken)
+                    :jwt.sign( {id : userData._id} , keys.SECRET, { expiresIn: '30s' }, cbSendToken)
                 }
                 
                 //check if password matches
@@ -40,13 +40,26 @@ export const authUser =(req, res)=> {
 
     //findOne by username
     Users.findOne(username, cbGetUser)//findOne
-
-
-
- 
- 
-
-  
-
 }//@end
+
+export const verifyToken = (req, res, next) =>  {
+    const bearerHeader = req.headers['authorization']
+
+    if(bearerHeader !== undefined){
+        const bearerToken = bearerHeader.split(' ')//split the Bearer and token
+        const token = bearerToken[1]// get the token on (Bearer token12eiuasd8)
+
+        const cbDecodeToken = (err, decoded) => {
+            // if token is doesn't have error and its not undefined
+            !err || decoded !== undefined ?  next() 
+            :res.status(401).send({errors: err})
+        }
+
+        jwt.verify(token, keys.SECRET, cbDecodeToken)
+
+    }else{
+        res.status(401).send({message: "Not Authorized!"})
+    }
+}//@end
+
  

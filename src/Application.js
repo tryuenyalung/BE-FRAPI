@@ -20,5 +20,5 @@ const app = express()
     Routes(app)
     
     
-app.get('*', (req, res) => res.status(404).send(keys.ERR_MSG) )
+    app.get('*', (req, res) => res.status(404).send(keys.ERR_MSG) )
 

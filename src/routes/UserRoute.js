@@ -8,6 +8,7 @@ import * as GenericValidator from './../validators/GenericValidator'
 const router = express.Router()
 
 router.get('/', 
+    // AuthController.verifyToken,
     UserController.paginatedUser, //check if it has query page=number
     UserController.findAllUsers
 )
