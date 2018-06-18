@@ -19,9 +19,12 @@ export const authUser =(req, res)=> {
              }else{
                 
                  const cbSendToken =(err, token)=> {//send token
-                    const dataForLocalStorage= {
+                    //destructure userData, exclude some fields
+                    const { password, created_at, update_at, __v, ...user} = userData._doc
+                    
+                    const dataForLocalStorage = {
                         token: token,
-                        user: userData
+                        user: user
                     }
                     res.send(dataForLocalStorage)
                 }//cbSendToken
@@ -51,8 +54,7 @@ export const verifyToken = (req, res, next) =>  {
 
         const cbDecodeToken = (err, decoded) => {
             // if token is doesn't have error and its not undefined
-            !err || decoded !== undefined ?  next() 
-            :res.status(401).send({errors: err})
+            !err || decoded !== undefined ?  next() : res.status(401).send({errors: err})
         }
 
         jwt.verify(token, keys.SECRET, cbDecodeToken)
