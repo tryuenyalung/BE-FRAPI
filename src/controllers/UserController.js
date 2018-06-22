@@ -110,8 +110,8 @@ export const searchQuery =(req, res)=> {
     else if(req.query.status){// y = true , any character(but intercepted on validator, use n for false) = false
         let statusInput = false
         req.query.status === 'y' ? statusInput = true : statusInput = false 
-        let searchObj = { status: statusInput }
-        Users.find({searchObj}, (err, data) => err ? res.status(500).send(err) : res.send(data) ) 
+        let searchObj = { status: true }
+        Users.find(searchObj, (err, data) => err ? res.status(500).send(err) : res.send(data) ) 
     }
 
     else if(req.query.department){
