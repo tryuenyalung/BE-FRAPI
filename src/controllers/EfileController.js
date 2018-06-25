@@ -122,8 +122,8 @@ export const updateEfile =(req, res)=> {
 //this needs to be refactor
 export const approveEfile =(req, res)=> {
     const id = req.params.efileId
-    
-    Efile.findById(id, (err, data) =>{//fetch the data from id
+
+    const cbApproveEfile = (err, data) =>{//fetch the data from id
         if(err){
             res.status(404).send( {message : `no efile found at id : ${req.params.id}`} )
         }else{
@@ -157,11 +157,14 @@ export const approveEfile =(req, res)=> {
                     const body = Object.assign( data, updated_recipients )//overwrite the data 
                     body.save( (err, data) =>  err ? res.send(err) : res.send(data) )//update the data from db
                 }//else
+                
             }//else
     
         }//else
     
-    })   
+    }//cbApproveEfile
+
+    Efile.findById(id, cbApproveEfile)   
 }//@end
 
 

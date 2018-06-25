@@ -74,6 +74,29 @@ export const updateUser =(req, res)=> {
     
 }//@end
 
+//update user's password by id
+export const updateUserPassword =(req, res)=> {
+    const id = req.params.userId;
+
+    Users.findById(id, (err, data) =>{//fetch the data from id
+        if(err){
+            res.status(404).send( {message : `no user found at id : ${req.params.id}`} )
+        }else{
+            let body = Object.assign( data, req.body )//overwrite the data 
+
+            bcrypt.hash(body.password, saltRounds).then( (hashedPassword) => {
+                //update the password on the body
+                Object.assign( body, {password: hashedPassword} )
+
+                body.save( (err, data) =>  err ? res.send(err) : res.send(data) )//update the data from db
+
+            })//bcrypt
+
+        }//else
+
+    })
+}//@end
+
 //delete one data by id
 export const deleteUser =(req, res)=> {
     const id = req.params.userId
@@ -97,6 +120,7 @@ export const searchQuery =(req, res)=> {
         findByQueryString(searchObj, page ,res)
     }
 
+    // DO NOT DELETE! 
     // else if(req.query.status){// y = true , any character(but intercepted on validator, use n for false) = false
     //     let statusInput = false
 

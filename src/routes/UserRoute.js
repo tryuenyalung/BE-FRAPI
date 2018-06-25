@@ -37,6 +37,11 @@ router.put('/:userId',
     UserController.updateUser
 )
 
+router.put('/password/:userId', 
+    // GenericValidator.validateObjectId,
+    UserController.updateUserPassword
+)
+
 router.delete('/:userId', 
     // GenericValidator.validateObjectId,
     UserController.deleteUser
