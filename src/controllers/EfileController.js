@@ -122,6 +122,8 @@ export const updateEfile =(req, res)=> {
 //this needs to be refactor
 export const approveEfile =(req, res)=> {
     const id = req.params.efileId
+   
+    console.log('pumasok ung req');
 
     const cbApproveEfile = (err, data) =>{//fetch the data from id
         if(err){
@@ -130,18 +132,35 @@ export const approveEfile =(req, res)=> {
             if(!data.pending_recipient.length){//check if no more pending recipients
                 res.status(400).send({message: `efile : ${id} , was already published`})
             }else{
+                console.log("pumasok sa cb");
                 let pending_recipient = data.pending_recipient
                 let approved_recipient = data.approved_recipient
-    
                 
-                //remove the first recipient to be transfer to approve recipient
+                const approve_user_details = req.body
+                
+
+
+                //remove the first recipient of the pending recipient to be transfer to approve recipient
                 let approve_user = pending_recipient.shift()
+                //get the old signature
+                let signatures = data.signatures
+                //append another signature
+                signatures += escape(`<span>
+                                        <div style='display:inline-block !important; text-align:center !important'>
+                                        <img src='${approve_user_details.signature}' width='150'>
+                                        <br> ${approve_user_details.name.first_name} ${approve_user_details.name.middle_name} ${approve_user_details.name.last_name} <br>
+                                        ${approve_user_details.position}
+                                        </div>
+                                    <span>`)
+ 
+
                 //add the recipient who approved the efile to the approved recipient
                 approved_recipient.push(approve_user)
     
                 let updated_recipients = {
                     approved_recipient : approved_recipient,
-                    pending_recipient : pending_recipient
+                    pending_recipient : pending_recipient,
+                    signatures: signatures
                 }
     
                 //check if pending recipients is empty

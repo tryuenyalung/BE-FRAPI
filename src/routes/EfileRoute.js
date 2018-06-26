@@ -39,7 +39,7 @@ router.get('/published/private/user/:userId',
 )
 
 // approve the efile
-router.get('/approve/:efileId', 
+router.put('/approve/:efileId', 
     EfileController.approveEfile
 )
 
