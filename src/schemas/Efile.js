@@ -29,7 +29,10 @@ let Efile = mongoose.Schema({
     
     approved_recipient:{ type: Array },
 
-    rejected_recipient: strNull,
+    rejected_recipient: {
+        type: Object,
+        default: null
+    },
 
     signatures: {
         type: String,

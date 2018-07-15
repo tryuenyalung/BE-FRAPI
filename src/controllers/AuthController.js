@@ -46,7 +46,7 @@ export const authUser =(req, res)=> {
 }//@end
 
 export const verifyToken = (req, res, next) =>  {
-    const bearerHeader = req.headers['authorization']
+    const bearerHeader = req.headers['Authorization']
 
     if(bearerHeader !== undefined){
         const bearerToken = bearerHeader.split(' ')//split the Bearer and token

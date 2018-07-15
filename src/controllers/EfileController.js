@@ -21,8 +21,11 @@ export const findAllEfiles =(req, res)=> {
 
 //read all data
 export const findAllPendingEfileById =(req, res)=> {
-    //search all pending efile that a specific user has, disregard content
-    const searchObj = { "pending_recipient.0.id" :  req.params.userId } 
+    //search all pending efile that a specific user has by id, disregard content
+    const searchObj = {
+        "pending_recipient.0.id" :  req.params.userId,
+        $where: "this.rejected_recipient ===  null"
+    } 
     let pageInput = req.query.page
     paginatedSearch(searchObj, pageInput, res)
 }//@end
@@ -123,7 +126,6 @@ export const updateEfile =(req, res)=> {
 export const approveEfile =(req, res)=> {
     const id = req.params.efileId
    
-    console.log('pumasok ung req');
 
     const cbApproveEfile = (err, data) =>{//fetch the data from id
         if(err){
@@ -132,7 +134,7 @@ export const approveEfile =(req, res)=> {
             if(!data.pending_recipient.length){//check if no more pending recipients
                 res.status(400).send({message: `efile : ${id} , was already published`})
             }else{
-                console.log("pumasok sa cb");
+                
                 let pending_recipient = data.pending_recipient
                 let approved_recipient = data.approved_recipient
                 
@@ -146,7 +148,7 @@ export const approveEfile =(req, res)=> {
                 let signatures = data.signatures
                 //append another signature
                 signatures += escape(`<span>
-                                        <div style='display:inline-block !important; text-align:center !important'>
+                                        <div style='display:inline-block !important; text-align:center !important; padding-left:10px !important; padding-right:10px !important;'>
                                         <img src='${approve_user_details.signature}' width='150'>
                                         <br> ${approve_user_details.name.first_name} ${approve_user_details.name.middle_name} ${approve_user_details.name.last_name} <br>
                                         ${approve_user_details.position}
@@ -166,7 +168,18 @@ export const approveEfile =(req, res)=> {
                 //check if pending recipients is empty
                 if(!pending_recipient.length){
                     //make the efile publish if no more pending recipients
-                    const publishedEfile = Object.assign( updated_recipients, {publish : true} )
+
+
+                    let content = unescape(data.content)
+
+                    content = content.substring(0, content.length - 20)
+
+                    content = ` ${content}  <div style='text-align: center !important'> ${unescape(updated_recipients.signatures)}</div></body></html>`
+
+                    let updatedContentWithSignature = escape(content)
+                    // let updatedContentWithSignature = content
+
+                    const publishedEfile = Object.assign( updated_recipients, {content: updatedContentWithSignature, publish : true} )
                     const body = Object.assign( data, publishedEfile )
 
                     //update efile content here 
