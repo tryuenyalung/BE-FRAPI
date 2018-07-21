@@ -1,5 +1,5 @@
 import Efile from './../schemas/Efile'
-
+import _ from 'lodash'
 
 //create efile
 export const createEfile =(req, res)=> {
@@ -32,11 +32,32 @@ export const findAllPendingEfileById =(req, res)=> {
 
 //read all data
 export const findAllPublicPublishedEfile =(req, res)=> {
-    const searchObj = {
+    const efileName = req.query.name
+    const sender = req.query.sender
+    const recipient = req.query.recipient
+    const createdAt = req.query.createdAt
+   
+    // _.isEmpty(createdAt) ? createdAt = null : createdAt = new Date( req.query.createdAt ).toISOString() 
+
+    let searchObj = {
         private_doc : false, 
-        publish: true
+        publish: true,
+        name: new RegExp( efileName, 'i'),
+        'recipient.name': new RegExp( recipient, 'i'),
+        'sender.name': new RegExp( sender, 'i'),
+        // created_at: new RegExp( createdAt, 'i'),
     }
+
+    // if createdAt not empty add search to db
+    if( !_.isEmpty(createdAt) ) {
+        searchObj  = { ...searchObj , ...{ created_at: { $gte: new Date( req.query.createdAt ).toISOString()  } } }
+    }  
+  
+    console.log(searchObj)
+    
+
     const pageInput = req.query.page
+    // Object.keys(searchObj).forEach((key) => (searchObj[key] == null) && delete searchObj[key])
     paginatedSearch(searchObj, pageInput, res)
 }//@end
 
@@ -56,10 +77,20 @@ export const findAllRejectedEfileByUserId =(req, res)=> {
 export const findAllPrivatePublishedEfileByUserId =(req, res)=> {
     const user_id = req.params.userId
     const pageInput = req.query.page
-    
-    const searchObj ={//find all private efile that has been published that you have access
+    const efileName = req.query.name
+    const sender = req.query.sender
+    const recipient = req.query.recipient
+    const createdAt = req.query.createdAt
+
+    // const searchName = req.query.name
+
+    let searchObj ={//find all private efile that has been published that you have access
         private_doc: true,//it is a private doc
         publish: true,// it is published
+        name: new RegExp( efileName, 'i'),
+        'recipient.name': new RegExp( recipient, 'i'),
+        'sender.name': new RegExp( sender, 'i'),
+        
         //should get all the published private efile if the user is either the sender or recipient
         $or: [
             { 
@@ -75,8 +106,14 @@ export const findAllPrivatePublishedEfileByUserId =(req, res)=> {
             {//check if the sender is you
                 'sender.id': user_id
             } 
-        ]//or
+        ],//or
+        
     }//sender object
+
+    // if createdAt not empty add search to db
+    if( !_.isEmpty(createdAt) ) {
+        searchObj  = { ...searchObj , ...{ created_at: { $gte: new Date( req.query.createdAt ).toISOString()  } } }
+    }  
     
     paginatedSearch(searchObj, pageInput, res)
 }//@end
@@ -171,9 +208,9 @@ export const approveEfile =(req, res)=> {
 
 
                     let content = unescape(data.content)
-
+                    // remove the </body> </html> on the end to append the signature
                     content = content.substring(0, content.length - 20)
-
+                    // insert the signature at the end and add </body> </html>
                     content = ` ${content}  <div style='text-align: center !important'> ${unescape(updated_recipients.signatures)}</div></body></html>`
 
                     let updatedContentWithSignature = escape(content)

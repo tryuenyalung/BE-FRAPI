@@ -18,4 +18,6 @@ export default () =>  {
         () => { console.log(`${new Date().toLocaleString()} mongodb : connnection success`) },
         err => { console.error( err )}
     )
+
+    // mongoose.connect(uri,  { useNewUrlParser: true })
 };
