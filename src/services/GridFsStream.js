@@ -1,6 +1,7 @@
 import mongoose from 'mongoose'
 import path from 'path'
 import Grid from 'gridfs-stream'
+import * as PaginationService from './Pagination'
 
 import keys from './../keys'
 
@@ -50,13 +51,19 @@ export const findOne =(req,res)=>{
  
  
 
+
 export const findAll =(req,res)=>{
-    
+    let page = req.query.page
+    let limit = req.query.limit
+
+    if(page === null || page <= 0){ page = 1 }
+    if(limit === null || limit <= 0){ limit = 8 }
+
     gfs.collection( "images")
     // gfs.collection( "fileType")
   
     const fileOwner = {metadata: {owner: "ownerId"}}
-    gfs.files.find(fileOwner).toArray( (err, files) =>  res.json(files) )
+    gfs.files.find(fileOwner).toArray( (err, files) =>  res.json( PaginationService.paginate(files, page, limit)  ))
 
 }
 

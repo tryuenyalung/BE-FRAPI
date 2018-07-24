@@ -1,0 +1,1 @@
+{"version":3,"sources":["../../src/controllers/FileController.js"],"names":["upload","req","res","json","file"],"mappings":";;;;;AAAO,IAAMA,0BAAQ,SAARA,MAAQ,CAACC,GAAD,EAAKC,GAAL,EAAW;AAC5BA,QAAIC,IAAJ,CAAS,EAACC,MAAMH,IAAIG,IAAX,EAAT;AACH,CAFM","file":"FileController.js","sourcesContent":["export const upload =(req,res)=>{\n    res.json({file: req.file})\n}\n\n "]}
