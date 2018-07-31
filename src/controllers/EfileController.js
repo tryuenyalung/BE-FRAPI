@@ -184,18 +184,25 @@ export const approveEfile =(req, res)=> {
                 //get the old signature
                 let signatures = data.signatures
                 //append another signature
-                signatures += escape(`<span>
-                                        <div style='display:inline-block !important; text-align:center !important; padding-left:10px !important; padding-right:10px !important;'>
-                                        <img src='${approve_user_details.signature}' width='150'>
-                                        <br> ${approve_user_details.name.first_name} ${approve_user_details.name.middle_name} ${approve_user_details.name.last_name} <br>
-                                        ${approve_user_details.position}
-                                        </div>
-                                    <span>`)
+
+                // signatures += escape(`<span>
+                //                         <div style='display:inline-block !important; text-align:center !important; padding-left:10px !important; padding-right:10px !important;'>
+                //                         <img src='${approve_user_details.signature}' width='150'>
+                //                         <br> ${approve_user_details.name.first_name} ${approve_user_details.name.middle_name} ${approve_user_details.name.last_name} <br>
+                //                         ${approve_user_details.position}
+                //                         </div>
+                //                         <span>`)
+
+                signatures.push({ // append signature to the existing signature
+                    name: `${approve_user_details.name.first_name} ${approve_user_details.name.middle_name} ${approve_user_details.name.last_name}`,
+                    signature: `${approve_user_details.signature}`,
+                    position: `${approve_user_details.position}`
+                })
  
 
                 //add the recipient who approved the efile to the approved recipient
                 approved_recipient.push(approve_user)
-    
+
                 let updated_recipients = {
                     approved_recipient : approved_recipient,
                     pending_recipient : pending_recipient,
@@ -207,19 +214,23 @@ export const approveEfile =(req, res)=> {
                     //make the efile publish if no more pending recipients
 
 
-                    let content = unescape(data.content)
-                    // remove the </body> </html> on the end to append the signature
-                    content = content.substring(0, content.length - 20)
-                    // insert the signature at the end and add </body> </html>
-                    content = ` ${content}  <div style='text-align: center !important'> ${unescape(updated_recipients.signatures)}</div></body></html>`
+                    // let content = unescape(data.content)
+                    // // remove the </body> </html> on the end to append the signature
+                    // content = content.substring(0, content.length - 20)
+                    // // insert the signature at the end and add </body> </html>
+                    // content = ` ${content}  <div style='text-align: center !important'> ${unescape(updated_recipients.signatures)}</div></body></html>`
 
-                    let updatedContentWithSignature = escape(content)
-                    // let updatedContentWithSignature = content
+                    // let updatedContentWithSignature = escape(content)
+                    // // let updatedContentWithSignature = content
 
-                    const publishedEfile = Object.assign( updated_recipients, {content: updatedContentWithSignature, publish : true} )
+                    // const publishedEfile = Object.assign( updated_recipients, {content: updatedContentWithSignature, publish : true} )
+                    // const body = Object.assign( data, publishedEfile )
+
+                    const publishedEfile = Object.assign( updated_recipients, {publish : true} )
                     const body = Object.assign( data, publishedEfile )
-
                     //update efile content here 
+
+                    
 
                     body.save( (err, data) =>  err ? res.send(err) : res.send(data) )//update the data from db
                 }else{//just update the pending & approved recipients

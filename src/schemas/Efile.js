@@ -35,8 +35,8 @@ let Efile = mongoose.Schema({
     },
 
     signatures: {
-        type: String,
-        default: ''
+        type: Array,
+        default: []
     },
 
     sender:{ type: Object },

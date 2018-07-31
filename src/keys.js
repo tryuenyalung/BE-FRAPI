@@ -21,9 +21,23 @@ export default {
         message:"cannot find file"
     },
 
+    "NO_BUCKET_ERR_MSG" : {
+        code: 400,
+        status:"BAD REQUEST", 
+        message:"please specify a bucket for file retrieval"
+    },
+
     "BUCKET_LIST": {
-        "image/jpeg": "images",
-        "image/png": "images"
+        "signature": "bucket_signature",
+        "image": "bucket_image"
+    },
+
+    "BUCKET": {
+        "IMAGE": "image",
+        "SIGNATURE": "signature",
+        "DOCUMENT": "document",
+        "SPREADSHEET": "spreadsheet",
+        "PRESENTATION": "presentation"
     },
     
     "FILE_EXT_LIST": {
@@ -31,3 +45,10 @@ export default {
         ".png": "images"
     }
 }
+
+
+
+// "BUCKET_LIST": {
+//     "image/jpeg": "images",
+//     "image/png": "images"
+// },

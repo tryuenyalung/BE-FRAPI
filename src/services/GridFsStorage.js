@@ -8,14 +8,10 @@ import keys from './../keys'
 
 const mlab = keys.USERS_DB
  
-const bucketList = keys.BUCKET_LIST
 
-// check the file extension and the bucket for it
-const getBucket =(fileType)=> {
-  let bucket = bucketList[fileType]
-  return bucket ? bucket : "uploads"
-}
 
+
+ 
 // stores the file to a specific bucket from the bucketlist
 const storage = new GridFsStorage({
 
@@ -23,6 +19,11 @@ const storage = new GridFsStorage({
 
     file: (req, file) => {
       
+      let bucketName = req.headers.bucket
+      let ownerId = req.headers.owner_id
+  
+      
+
       return new Promise((resolve, reject) => {
         
         // create unique filename
@@ -35,9 +36,10 @@ const storage = new GridFsStorage({
             const fileInfo = {
                 filename: filename,
                 metadata: {
-                  owner: "ownerId"
+                  owner: ownerId,
+                  type: bucketName
                 },
-                bucketName: getBucket(file.mimetype)
+                bucketName: bucketName
             }
 
             resolve(fileInfo)

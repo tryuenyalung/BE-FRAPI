@@ -25,45 +25,91 @@ let getExtForBucket =(fileExt)=> {
 }
 
 
-export const findOne =(req,res)=>{
+export const findOne=(bucket)=>{
   
-    const fileExt = path.extname(req.params.filename)
-    const fileName = {filename: req.params.filename}
-
-    // select a bucket base on file extension
-    gfs.collection( getExtForBucket(fileExt) )
+   return (req,res)=>{
+  
+        const fileName = {filename: req.params.filename}
     
-    gfs.files.findOne(fileName, (err, file) =>{
-        const readstream = gfs.createReadStream(fileName)
-        // return error msg
-        readstream.on('error', (err) => res.status(404).send(keys.FILE_ERR_MSG))
-        // return file
-        readstream.pipe(res)
+        gfs.collection( bucket )
+        
+        const cbFindFile = (err, file) =>{
+            const readstream = gfs.createReadStream(fileName)
+            // return error msg
+            // readstream.on('error', (err) => res.status(404).send(keys.FILE_ERR_MSG))
+            readstream.on('error', (err) => res.status(404).send(keys.FILE_ERR_MSG))
+            // return file
+            readstream.pipe(res)
+        }
 
-    })
-
+        gfs.files.findOne(fileName, cbFindFile)
+   }
 }
+
+// export const findOne =(req,res,bucket)=>{
+  
+//     const fileExt = path.extname(req.params.filename)
+//     const bucketName = bucket
+//     const fileName = {filename: req.params.filename}
+
+//     // select a bucket base on file extension
+//     gfs.collection( bucketName )
+    
+//     gfs.files.findOne(fileName, (err, file) =>{
+//         const readstream = gfs.createReadStream(fileName)
+//         // return error msg
+//         readstream.on('error', (err) => res.status(404).send(keys.FILE_ERR_MSG))
+//         // return file
+//         readstream.pipe(res)
+
+//     })
+
+// }
 
 // gfs.files.find({ filename: 'myImage.png' }).toArray(function (err, files) {
 //     if (err) ...
 //     console.log(files);
 //   })
  
- 
+
+export const findAllFilesByOwner =(req,res)=>{
+    const page = req.query.page
+    const limit = req.query.limit
+
+    const bucket = req.headers.bucket
+    const fileOwner = { metadata: {owner: req.headers.owner_id} }
+
+    // choose a bucket to search files
+    gfs.collection( bucket )
+    
+
+    const cbFindFile =(err, files)=>  {
+        err ? res.status(400).send(err) :
+        res.json( PaginationService.paginate(files, page, limit) )
+    }
+
+    gfs.files.find(fileOwner).toArray(cbFindFile)
+
+}
+
 
 
 export const findAll =(req,res)=>{
-    let page = req.query.page
-    let limit = req.query.limit
+    const page = req.query.page
+    const limit = req.query.limit
+    const file_type = req.headers.file_type
 
-    if(page === null || page <= 0){ page = 1 }
-    if(limit === null || limit <= 0){ limit = 8 }
-
-    gfs.collection( "images")
+    gfs.collection( file_type )
     // gfs.collection( "fileType")
   
     const fileOwner = {metadata: {owner: "ownerId"}}
-    gfs.files.find(fileOwner).toArray( (err, files) =>  res.json( PaginationService.paginate(files, page, limit)  ))
+
+    const cbFindFile =(err, files)=>  {
+        err ? res.status(400).send(err) :
+        res.json( PaginationService.paginate(files, page, limit) )
+    }
+
+    gfs.files.find(fileOwner).toArray(cbFindFile)
 
 }
 
@@ -71,4 +117,6 @@ export const findAll =(req,res)=>{
 
  
 
- 
+ //findByUser
+ //header file_type
+ //header user?
