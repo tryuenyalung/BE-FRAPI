@@ -33,6 +33,7 @@ export default {
     },
 
     "BUCKET": {
+        "PROFILE": "profile",
         "IMAGE": "image",
         "SIGNATURE": "signature",
         "DOCUMENT": "document",

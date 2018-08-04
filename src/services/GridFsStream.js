@@ -75,9 +75,14 @@ export const findOne=(bucket)=>{
 export const findAllFilesByOwner =(req,res)=>{
     const page = req.query.page
     const limit = req.query.limit
-
+    const image_tag = req.query.tag
     const bucket = req.headers.bucket
-    const fileOwner = { metadata: {owner: req.headers.owner_id} }
+
+    const fileOwner = {
+         metadata: {
+             owner: req.headers.owner_id,
+            } 
+        }
 
     // choose a bucket to search files
     gfs.collection( bucket )
@@ -97,20 +102,35 @@ export const findAllFilesByOwner =(req,res)=>{
 export const findAll =(req,res)=>{
     const page = req.query.page
     const limit = req.query.limit
-    const file_type = req.headers.file_type
+    // const file_type = req.headers.file_type
 
-    gfs.collection( file_type )
+    gfs.collection( "image" )
     // gfs.collection( "fileType")
   
-    const fileOwner = {metadata: {owner: "ownerId"}}
+    // const fileOwner = {
+    //     metadata: {
+    //         owner: "5b61c8a8d0902c000414ccd6", req.headers.owner_id
+    //         image_tag: "weee"
+    //     }
+    // }
+
+    const fileOwner = {
+        'metadata.owner': req.headers.owner_id , 
+        'metadata.image_tag': new RegExp( req.headers.tag, 'i') ,
+        'metadata.isDeleted': false
+    }
 
     const cbFindFile =(err, files)=>  {
         err ? res.status(400).send(err) :
         res.json( PaginationService.paginate(files, page, limit) )
     }
 
-    gfs.files.find(fileOwner).toArray(cbFindFile)
+    // {
+    //     'metadata.section': 'my-blog'
+    //     'metadata.published': { '$lt': datetime.utcnow() } }
 
+    gfs.files.find(fileOwner).toArray(cbFindFile)
+ 
 }
 
 

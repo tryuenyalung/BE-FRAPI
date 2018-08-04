@@ -23,7 +23,7 @@ const storage = new GridFsStorage({
       let ownerId = req.headers.owner_id
   
       
-
+ 
       return new Promise((resolve, reject) => {
         
         // create unique filename
@@ -37,7 +37,8 @@ const storage = new GridFsStorage({
                 filename: filename,
                 metadata: {
                   owner: ownerId,
-                  type: bucketName
+                  image_tag: req.body.image_tag,
+                  isDeleted: false
                 },
                 bucketName: bucketName
             }

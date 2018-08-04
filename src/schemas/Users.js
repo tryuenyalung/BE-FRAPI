@@ -23,7 +23,7 @@ let Users = mongoose.Schema({
 
     avatar:{
         type: String,
-        default: keys.DEFAULT_AVATAR
+        default: null
     },
 
     name : Name,
