@@ -4,6 +4,7 @@ import Grid from 'gridfs-stream'
 import * as PaginationService from './Pagination'
 
 import keys from './../keys'
+import { BADSTR } from 'dns';
 
 
 const mlab = keys.USERS_DB
@@ -75,18 +76,17 @@ export const findOne=(bucket)=>{
 export const findAllFilesByOwner =(req,res)=>{
     const page = req.query.page
     const limit = req.query.limit
+    const bucket = req.query.bucket
     const image_tag = req.query.tag
-    const bucket = req.headers.bucket
+    const owner_id = req.query.id
+
+    gfs.collection( bucket )
 
     const fileOwner = {
-         metadata: {
-             owner: req.headers.owner_id,
-            } 
-        }
-
-    // choose a bucket to search files
-    gfs.collection( bucket )
-    
+        'metadata.owner': owner_id , 
+        'metadata.image_tag': new RegExp( image_tag, 'i') ,
+        'metadata.isDeleted': false
+    }
 
     const cbFindFile =(err, files)=>  {
         err ? res.status(400).send(err) :
@@ -99,12 +99,63 @@ export const findAllFilesByOwner =(req,res)=>{
 
 
 
+export const deactivateFile =(req,res)=>{
+    const bucket = req.query.bucket
+    const filename = req.query.filename
+
+    gfs.collection( bucket )
+
+    const cbdeactivate = (err, updated) => { 
+        err ? res.status(400).send("err") : res.status(200).send("file deactivated")
+    }
+
+    gfs.files.update({ filename: filename}, { $set: { 'metadata.isDeleted': true } }, cbdeactivate)
+
+}
+
+// db.open()
+//     // !!!!!!!!!
+//     // !WARNING! THIS DROPS THE CURRENT DATABASE
+//     // !!!!!!!!!
+//     .then(() => db.dropDatabase())
+//     .then(() => {
+//         const gfs = Grid(db, mongo);
+
+//         // create my_file
+//         return new Promise((resolve, reject) => {
+//             gfs.createWriteStream({ filename: 'my_file.txt' })
+//                 .once('finish', resolve)
+//                 .once('error', reject)
+//                 .end('hello world');
+//         })
+//             // find my_file
+//             .then(() => gfs.files.findOne({ filename: 'my_file.txt'})
+//             .then(file => console.log('should find file:', !!file)))
+//             // rename my_file to my_renamed_file
+//             .then(() => gfs.files.update(
+//                 { filename: 'my_file.txt'},
+//                 { $set: { filename: 'my_renamed_file.txt' } }
+//             )
+//             .then(res => console.log('should have modified:', res.result.nModified === 1)))
+//             // should not find my_file
+//             .then(() => gfs.files.findOne({ filename: 'my_file.txt'})
+//             .then(file => console.log('should not find: ', !file)))
+//             // should find my_renamed_file
+//             .then(() => gfs.files.findOne({ filename: 'my_renamed_file.txt'})
+//             .then(file => console.log('should find renamed:', !!file)))
+//     })
+//     .catch(console.error);
+
+
+
 export const findAll =(req,res)=>{
     const page = req.query.page
     const limit = req.query.limit
-    // const file_type = req.headers.file_type
+    const bucket = req.query.bucket
+    const image_tag = req.query.tag
+    const owner_id = req.query.id
 
-    gfs.collection( "image" )
+    gfs.collection( bucket )
     // gfs.collection( "fileType")
   
     // const fileOwner = {
@@ -115,8 +166,8 @@ export const findAll =(req,res)=>{
     // }
 
     const fileOwner = {
-        'metadata.owner': req.headers.owner_id , 
-        'metadata.image_tag': new RegExp( req.headers.tag, 'i') ,
+        'metadata.owner': owner_id , 
+        'metadata.image_tag': new RegExp( image_tag, 'i') ,
         'metadata.isDeleted': false
     }
 

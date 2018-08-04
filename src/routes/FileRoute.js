@@ -14,9 +14,11 @@ import keys from './../keys'
 
 const router = express.Router()
 
-router.get('/', FileStream.findAll)
-// router.get('/', FileStream.findAllFilesByOwner)
- 
+// router.get('/', FileStream.findAll)
+router.get('/', FileStream.findAllFilesByOwner)
+
+router.get('/delete', FileStream.deactivateFile)
+
 router.get('/signature/:filename', FileStream.findOne(keys.BUCKET.SIGNATURE) )
 router.get('/image/:filename', FileStream.findOne(keys.BUCKET.IMAGE) )
 router.get('/profile/:filename', FileStream.findOne(keys.BUCKET.PROFILE) )

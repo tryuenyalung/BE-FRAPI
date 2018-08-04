@@ -98,16 +98,17 @@ var findOne = exports.findOne = function findOne(bucket) {
 var findAllFilesByOwner = exports.findAllFilesByOwner = function findAllFilesByOwner(req, res) {
     var page = req.query.page;
     var limit = req.query.limit;
+    var bucket = req.query.bucket;
     var image_tag = req.query.tag;
-    var bucket = req.headers.bucket;
+    var owner_id = req.query.id;
+
+    gfs.collection(bucket);
 
     var fileOwner = {
-        metadata: {
-            owner: req.headers.owner_id
-        }
-
-        // choose a bucket to search files
-    };gfs.collection(bucket);
+        'metadata.owner': owner_id,
+        'metadata.image_tag': new RegExp(image_tag, 'i'),
+        'metadata.isDeleted': false
+    };
 
     var cbFindFile = function cbFindFile(err, files) {
         err ? res.status(400).send(err) : res.json(PaginationService.paginate(files, page, limit));
@@ -119,9 +120,11 @@ var findAllFilesByOwner = exports.findAllFilesByOwner = function findAllFilesByO
 var findAll = exports.findAll = function findAll(req, res) {
     var page = req.query.page;
     var limit = req.query.limit;
-    // const file_type = req.headers.file_type
+    var bucket = req.query.bucket;
+    var image_tag = req.query.tag;
+    var owner_id = req.query.id;
 
-    gfs.collection("image");
+    gfs.collection(bucket);
     // gfs.collection( "fileType")
 
     // const fileOwner = {
@@ -132,8 +135,9 @@ var findAll = exports.findAll = function findAll(req, res) {
     // }
 
     var fileOwner = {
-        'metadata.owner': req.headers.owner_id,
-        'metadata.image_tag': new RegExp(req.headers.tag, 'i')
+        'metadata.owner': owner_id,
+        'metadata.image_tag': new RegExp(image_tag, 'i'),
+        'metadata.isDeleted': false
     };
 
     var cbFindFile = function cbFindFile(err, files) {

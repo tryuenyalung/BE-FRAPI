@@ -36,8 +36,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var router = _express2.default.Router();
 
-router.get('/', FileStream.findAll);
-// router.get('/', FileStream.findAllFilesByOwner)
+// router.get('/', FileStream.findAll)
+router.get('/', FileStream.findAllFilesByOwner);
 
 router.get('/signature/:filename', FileStream.findOne(_keys2.default.BUCKET.SIGNATURE));
 router.get('/image/:filename', FileStream.findOne(_keys2.default.BUCKET.IMAGE));
