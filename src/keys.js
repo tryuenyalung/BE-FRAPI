@@ -3,8 +3,7 @@ export default {
     "LOCAL_PORT": 5000,
 
     "SECRET": "10bjklnasldknoai0981y2laskdn",
-
-    "USERS_DB": "mongodb://root:root@ds149134.mlab.com:49134/mydb",
+    "USERS_DB": "mongodb://root:admin1@ds113522.mlab.com:13522/frepo",
 
     "DEFAULT_AVATAR" : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQF1zJt89f-BE-BEriCrVlTfXhOKdTnVzo-CdfbL4S9aC4gzA03",
     
@@ -53,3 +52,4 @@ export default {
 //     "image/jpeg": "images",
 //     "image/png": "images"
 // },
+// "USERS_DB": "mongodb://root:root@ds149134.mlab.com:49134/mydb",
