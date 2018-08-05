@@ -77,14 +77,14 @@ export const findAllFilesByOwner =(req,res)=>{
     const page = req.query.page
     const limit = req.query.limit
     const bucket = req.query.bucket
-    const image_tag = req.query.tag
+    const tag = req.query.tag
     const owner_id = req.query.id
 
     gfs.collection( bucket )
 
     const fileOwner = {
         'metadata.owner': owner_id , 
-        'metadata.image_tag': new RegExp( image_tag, 'i') ,
+        'metadata.tag': new RegExp( tag, 'i') ,
         'metadata.isDeleted': false
     }
 
@@ -106,7 +106,7 @@ export const deactivateFile =(req,res)=>{
     gfs.collection( bucket )
 
     const cbdeactivate = (err, updated) => { 
-        err ? res.status(400).send("err") : res.status(200).send("file deactivated")
+        err ? res.status(400).send("err") : res.status(200).send({message:"file deactivated"})
     }
 
     gfs.files.update({ filename: filename}, { $set: { 'metadata.isDeleted': true } }, cbdeactivate)

@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.findAll = exports.findAllFilesByOwner = exports.findOne = undefined;
+exports.findAll = exports.deactivateFile = exports.findAllFilesByOwner = exports.findOne = undefined;
 
 var _mongoose = require('mongoose');
 
@@ -24,6 +24,8 @@ var PaginationService = _interopRequireWildcard(_Pagination);
 var _keys = require('./../keys');
 
 var _keys2 = _interopRequireDefault(_keys);
+
+var _dns = require('dns');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -99,14 +101,14 @@ var findAllFilesByOwner = exports.findAllFilesByOwner = function findAllFilesByO
     var page = req.query.page;
     var limit = req.query.limit;
     var bucket = req.query.bucket;
-    var image_tag = req.query.tag;
+    var tag = req.query.tag;
     var owner_id = req.query.id;
 
     gfs.collection(bucket);
 
     var fileOwner = {
         'metadata.owner': owner_id,
-        'metadata.image_tag': new RegExp(image_tag, 'i'),
+        'metadata.tag': new RegExp(tag, 'i'),
         'metadata.isDeleted': false
     };
 
@@ -116,6 +118,53 @@ var findAllFilesByOwner = exports.findAllFilesByOwner = function findAllFilesByO
 
     gfs.files.find(fileOwner).toArray(cbFindFile);
 };
+
+var deactivateFile = exports.deactivateFile = function deactivateFile(req, res) {
+    var bucket = req.query.bucket;
+    var filename = req.query.filename;
+
+    gfs.collection(bucket);
+
+    var cbdeactivate = function cbdeactivate(err, updated) {
+        err ? res.status(400).send("err") : res.status(200).send({ message: "file deactivated" });
+    };
+
+    gfs.files.update({ filename: filename }, { $set: { 'metadata.isDeleted': true } }, cbdeactivate);
+};
+
+// db.open()
+//     // !!!!!!!!!
+//     // !WARNING! THIS DROPS THE CURRENT DATABASE
+//     // !!!!!!!!!
+//     .then(() => db.dropDatabase())
+//     .then(() => {
+//         const gfs = Grid(db, mongo);
+
+//         // create my_file
+//         return new Promise((resolve, reject) => {
+//             gfs.createWriteStream({ filename: 'my_file.txt' })
+//                 .once('finish', resolve)
+//                 .once('error', reject)
+//                 .end('hello world');
+//         })
+//             // find my_file
+//             .then(() => gfs.files.findOne({ filename: 'my_file.txt'})
+//             .then(file => console.log('should find file:', !!file)))
+//             // rename my_file to my_renamed_file
+//             .then(() => gfs.files.update(
+//                 { filename: 'my_file.txt'},
+//                 { $set: { filename: 'my_renamed_file.txt' } }
+//             )
+//             .then(res => console.log('should have modified:', res.result.nModified === 1)))
+//             // should not find my_file
+//             .then(() => gfs.files.findOne({ filename: 'my_file.txt'})
+//             .then(file => console.log('should not find: ', !file)))
+//             // should find my_renamed_file
+//             .then(() => gfs.files.findOne({ filename: 'my_renamed_file.txt'})
+//             .then(file => console.log('should find renamed:', !!file)))
+//     })
+//     .catch(console.error);
+
 
 var findAll = exports.findAll = function findAll(req, res) {
     var page = req.query.page;

@@ -21,7 +21,7 @@ const storage = new GridFsStorage({
       
       let bucketName = req.query.bucket
       let ownerId = req.query.id
-      let image_tag = req.query.tag
+      let tag = req.query.tag
   
       
  
@@ -38,7 +38,7 @@ const storage = new GridFsStorage({
                 filename: filename,
                 metadata: {
                   owner: ownerId,
-                  image_tag: image_tag,
+                  tag: tag,
                   isDeleted: false
                 },
                 bucketName: bucketName
