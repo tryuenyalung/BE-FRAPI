@@ -2,6 +2,7 @@ import express from 'express'
 import * as FileController from './../controllers/FileController'
 import * as FileUpload from './../services/GridFsStorage'
 import * as FileStream from './../services/GridFsStream'
+import * as FileValidator from './../validators/FileValidator'
 import keys from './../keys'
 
 
@@ -30,6 +31,11 @@ router.post( "/",
     // FileController.validateFile,
     FileUpload.upload.single('file'),
     FileController.sendResponse
+)
+
+router.put( "/",
+    FileValidator.validateUpdateSharedUser,
+    FileStream.updateSharedUser
 )
 
 // router.put(

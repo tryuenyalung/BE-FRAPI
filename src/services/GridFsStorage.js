@@ -39,7 +39,8 @@ const storage = new GridFsStorage({
                 metadata: {
                   owner: ownerId,
                   tag: tag,
-                  isDeleted: false
+                  isDeleted: false,
+                  sharedUser: []
                 },
                 bucketName: bucketName
             }

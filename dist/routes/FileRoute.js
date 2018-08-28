@@ -1,7 +1,7 @@
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
-  value: true
+    value: true
 });
 
 var _express = require('express');
@@ -19,6 +19,10 @@ var FileUpload = _interopRequireWildcard(_GridFsStorage);
 var _GridFsStream = require('./../services/GridFsStream');
 
 var FileStream = _interopRequireWildcard(_GridFsStream);
+
+var _FileValidator = require('./../validators/FileValidator');
+
+var FileValidator = _interopRequireWildcard(_FileValidator);
 
 var _keys = require('./../keys');
 
@@ -51,6 +55,8 @@ router.get('/spreadsheet/:filename', FileStream.findOne(_keys2.default.BUCKET.SP
 router.post("/",
 // FileController.validateFile,
 FileUpload.upload.single('file'), FileController.sendResponse);
+
+router.put("/", FileValidator.validateUpdateSharedUser, FileStream.updateSharedUser);
 
 // router.put(
 //     '/:id', 

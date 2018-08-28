@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.findAll = exports.deactivateFile = exports.findAllFilesByOwner = exports.findOne = undefined;
+exports.findAll = exports.updateSharedUser = exports.deactivateFile = exports.findAllFilesByOwner = exports.findOne = undefined;
 
 var _mongoose = require('mongoose');
 
@@ -21,11 +21,17 @@ var _Pagination = require('./Pagination');
 
 var PaginationService = _interopRequireWildcard(_Pagination);
 
+var _lodash = require('lodash');
+
+var _lodash2 = _interopRequireDefault(_lodash);
+
 var _keys = require('./../keys');
 
 var _keys2 = _interopRequireDefault(_keys);
 
 var _dns = require('dns');
+
+var _fs = require('fs');
 
 function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
@@ -120,16 +126,82 @@ var findAllFilesByOwner = exports.findAllFilesByOwner = function findAllFilesByO
 };
 
 var deactivateFile = exports.deactivateFile = function deactivateFile(req, res) {
-    var bucket = req.query.bucket;
-    var filename = req.query.filename;
 
-    gfs.collection(bucket);
-
-    var cbdeactivate = function cbdeactivate(err, updated) {
-        err ? res.status(400).send("err") : res.status(200).send({ message: "file deactivated" });
+    var config = {
+        queryString: req.query,
+        validQueryString: ['bucket', 'filename'],
+        UPDATE_METADATA: {
+            'metadata.isDeleted': true
+        }
     };
 
-    gfs.files.update({ filename: filename }, { $set: { 'metadata.isDeleted': true } }, cbdeactivate);
+    validatingQueryString(config).then(function (x) {
+        return deactivatingFile(x);
+    }).then(function (x) {
+        return res.status(200).send(x);
+    }).catch(function (err) {
+        return res.status(400).send(err);
+    });
+
+    //PROMISE
+    var deactivatingFile = function deactivatingFile(data) {
+        return new Promise(function (resolve, reject) {
+
+            gfs.collection(data.queryString.bucket);
+
+            var cbDeactivateFile = function cbDeactivateFile(err, updated) {
+                return err ? reject("error on updating metadata") : resolve({ message: "file deactivated" });
+            };
+
+            gfs.files.update({ filename: data.queryString.filename }, { $set: data.UPDATE_METADATA }, cbDeactivateFile);
+        });
+    };
+};
+
+var updateSharedUser = exports.updateSharedUser = function updateSharedUser(req, res) {
+
+    var config = {
+        bucket: req.body.bucket,
+        filename: req.body.filename,
+        UPDATE_METADATA: {
+            'metadata.sharedUser': req.body.sharedUser
+        }
+    };
+
+    updatingSharedUser(config).then(function (x) {
+        return res.status(200).send(x);
+    }).catch(function (err) {
+        return res.status(400).send(err);
+    });
+
+    //PROMISE
+    var updatingSharedUser = function updatingSharedUser(data) {
+        return new Promise(function (resolve, reject) {
+
+            gfs.collection(data.bucket);
+
+            var cbUpdateSharedUser = function cbUpdateSharedUser(err, updated) {
+                return err ? reject("error on updating metadata") : resolve({ message: "updated shared users" });
+            };
+
+            gfs.files.update({ filename: data.filename }, { $set: data.UPDATE_METADATA }, cbUpdateSharedUser);
+        });
+    };
+};
+
+//REUSABLE PROMISE
+var validatingQueryString = function validatingQueryString(data) {
+
+    var msg = "";
+
+    return new Promise(function (resolve, reject) {
+
+        data.validQueryString.forEach(function (x) {
+            if (x in data.queryString === false) msg = ' ' + (msg + x) + ', ';
+        });
+
+        !_lodash2.default.isEmpty(msg) ? reject({ "error": 'missing query strings :' + msg }) : resolve(data);
+    });
 };
 
 // db.open()

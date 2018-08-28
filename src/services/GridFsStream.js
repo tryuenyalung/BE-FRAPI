@@ -2,9 +2,14 @@ import mongoose from 'mongoose'
 import path from 'path'
 import Grid from 'gridfs-stream'
 import * as PaginationService from './Pagination'
-
+import _ from 'lodash'
 import keys from './../keys'
-import { BADSTR } from 'dns';
+import {
+    BADSTR
+} from 'dns';
+import {
+    copyFile
+} from 'fs';
 
 
 const mlab = keys.USERS_DB
@@ -20,21 +25,23 @@ conn.once('open', () => {
 const fileExtList = keys.FILE_EXT_LIST
 
 // check if valid file extension and fetch it on a dedicated bucket
-let getExtForBucket =(fileExt)=> {
-  let bucket = fileExtList[fileExt]
-  return bucket ? bucket : "uploads"
+let getExtForBucket = (fileExt) => {
+    let bucket = fileExtList[fileExt]
+    return bucket ? bucket : "uploads"
 }
 
 
-export const findOne=(bucket)=>{
-  
-   return (req,res)=>{
-  
-        const fileName = {filename: req.params.filename}
-    
-        gfs.collection( bucket )
-        
-        const cbFindFile = (err, file) =>{
+export const findOne = (bucket) => {
+
+    return (req, res) => {
+
+        const fileName = {
+            filename: req.params.filename
+        }
+
+        gfs.collection(bucket)
+
+        const cbFindFile = (err, file) => {
             const readstream = gfs.createReadStream(fileName)
             // return error msg
             // readstream.on('error', (err) => res.status(404).send(keys.FILE_ERR_MSG))
@@ -44,18 +51,18 @@ export const findOne=(bucket)=>{
         }
 
         gfs.files.findOne(fileName, cbFindFile)
-   }
+    }
 }
 
 // export const findOne =(req,res,bucket)=>{
-  
+
 //     const fileExt = path.extname(req.params.filename)
 //     const bucketName = bucket
 //     const fileName = {filename: req.params.filename}
 
 //     // select a bucket base on file extension
 //     gfs.collection( bucketName )
-    
+
 //     gfs.files.findOne(fileName, (err, file) =>{
 //         const readstream = gfs.createReadStream(fileName)
 //         // return error msg
@@ -71,26 +78,26 @@ export const findOne=(bucket)=>{
 //     if (err) ...
 //     console.log(files);
 //   })
- 
 
-export const findAllFilesByOwner =(req,res)=>{
+
+export const findAllFilesByOwner = (req, res) => {
     const page = req.query.page
     const limit = req.query.limit
     const bucket = req.query.bucket
     const tag = req.query.tag
     const owner_id = req.query.id
 
-    gfs.collection( bucket )
+    gfs.collection(bucket)
 
     const fileOwner = {
-        'metadata.owner': owner_id , 
-        'metadata.tag': new RegExp( tag, 'i') ,
+        'metadata.owner': owner_id,
+        'metadata.tag': new RegExp(tag, 'i'),
         'metadata.isDeleted': false
     }
 
-    const cbFindFile =(err, files)=>  {
+    const cbFindFile = (err, files) => {
         err ? res.status(400).send(err) :
-        res.json( PaginationService.paginate(files, page, limit) )
+            res.json(PaginationService.paginate(files, page, limit))
     }
 
     gfs.files.find(fileOwner).toArray(cbFindFile)
@@ -99,19 +106,106 @@ export const findAllFilesByOwner =(req,res)=>{
 
 
 
-export const deactivateFile =(req,res)=>{
-    const bucket = req.query.bucket
-    const filename = req.query.filename
+export const deactivateFile = (req, res) => {
 
-    gfs.collection( bucket )
-
-    const cbdeactivate = (err, updated) => { 
-        err ? res.status(400).send("err") : res.status(200).send({message:"file deactivated"})
+    const config = {
+        queryString: req.query,
+        validQueryString: ['bucket', 'filename'],
+        UPDATE_METADATA: {
+            'metadata.isDeleted': true
+        }
     }
 
-    gfs.files.update({ filename: filename}, { $set: { 'metadata.isDeleted': true } }, cbdeactivate)
+    validatingQueryString(config)
+        .then(x => deactivatingFile(x))
+        .then(x => res.status(200).send(x))
+        .catch(err => res.status(400).send(err))
+
+
+
+    //PROMISE
+    const deactivatingFile = (data) => {
+        return new Promise((resolve, reject) => {
+
+            gfs.collection(data.queryString.bucket)
+
+            const cbDeactivateFile = (err, updated) =>
+                err ? reject("error on updating metadata") : resolve({
+                    message: "file deactivated"
+                })
+
+            gfs.files.update({
+                filename: data.queryString.filename
+            }, {
+                $set: data.UPDATE_METADATA
+            }, cbDeactivateFile)
+
+        })
+    }
 
 }
+
+
+export const updateSharedUser = (req, res) => {
+    //PROMISE
+    const updatingSharedUser = (data) => {
+        return new Promise((resolve, reject) => {
+
+            gfs.collection(data.bucket)
+
+            const cbUpdateSharedUser = (err, updated) =>
+                err ? reject("error on updating metadata") : resolve({
+                    message: "updated shared users"
+                })
+
+            gfs.files.update({
+                filename: data.filename
+            }, {
+                $set: data.UPDATE_METADATA
+            }, cbUpdateSharedUser)
+
+        })
+    }
+    const config = {
+        bucket: req.body.bucket,
+        filename: req.body.filename,
+        UPDATE_METADATA: {
+            'metadata.sharedUser': req.body.sharedUser
+        }
+    }
+
+    return updatingSharedUser(config)
+        .then(x => res.status(200).send(x))
+        .catch(err => res.status(400).send(err))
+
+}
+
+
+
+//REUSABLE PROMISE
+let validatingQueryString = (data) => {
+
+    let msg = ""
+
+    return new Promise((resolve, reject) => {
+
+        data.validQueryString.forEach(x => {
+                if (x in data.queryString === false) msg = ` ${msg + x}, `
+            })
+
+            !_.isEmpty(msg) ? reject({
+                "error": `missing query strings :${msg}`
+            }) : resolve(data)
+
+    })
+}
+
+
+
+
+
+
+
 
 // db.open()
 //     // !!!!!!!!!
@@ -148,16 +242,16 @@ export const deactivateFile =(req,res)=>{
 
 
 
-export const findAll =(req,res)=>{
+export const findAll = (req, res) => {
     const page = req.query.page
     const limit = req.query.limit
     const bucket = req.query.bucket
     const image_tag = req.query.tag
     const owner_id = req.query.id
 
-    gfs.collection( bucket )
+    gfs.collection(bucket)
     // gfs.collection( "fileType")
-  
+
     // const fileOwner = {
     //     metadata: {
     //         owner: "5b61c8a8d0902c000414ccd6", req.headers.owner_id
@@ -166,14 +260,14 @@ export const findAll =(req,res)=>{
     // }
 
     const fileOwner = {
-        'metadata.owner': owner_id , 
-        'metadata.image_tag': new RegExp( image_tag, 'i') ,
+        'metadata.owner': owner_id,
+        'metadata.image_tag': new RegExp(image_tag, 'i'),
         'metadata.isDeleted': false
     }
 
-    const cbFindFile =(err, files)=>  {
+    const cbFindFile = (err, files) => {
         err ? res.status(400).send(err) :
-        res.json( PaginationService.paginate(files, page, limit) )
+            res.json(PaginationService.paginate(files, page, limit))
     }
 
     // {
@@ -181,13 +275,13 @@ export const findAll =(req,res)=>{
     //     'metadata.published': { '$lt': datetime.utcnow() } }
 
     gfs.files.find(fileOwner).toArray(cbFindFile)
- 
+
 }
 
 
 
- 
 
- //findByUser
- //header file_type
- //header user?
+
+//findByUser
+//header file_type
+//header user?

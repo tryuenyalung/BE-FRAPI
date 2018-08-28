@@ -59,7 +59,8 @@ var storage = new _multerGridfsStorage2.default({
           metadata: {
             owner: ownerId,
             tag: tag,
-            isDeleted: false
+            isDeleted: false,
+            sharedUser: []
           },
           bucketName: bucketName
         };
