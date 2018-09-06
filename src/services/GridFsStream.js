@@ -105,6 +105,41 @@ export const findAllFilesByOwner = (req, res) => {
 }
 
 
+export const findAllSharedFilesByUserId = (req, res) => {
+    const page = req.query.page
+    const limit = req.query.limit
+    const bucket = req.query.bucket
+    const tag = req.query.tag
+    const sharedUser_id = req.query.id
+
+    gfs.collection(bucket)
+
+    const fileOwner = {
+        'metadata.tag': new RegExp(tag, 'i'),
+        'metadata.sharedUser': { 
+             $elemMatch:{
+                //any record on arrays of object containing the id will be displayed
+                id : sharedUser_id
+            }
+        },
+             
+        'metadata.isDeleted': false
+    }
+
+
+    const cbFindFile = (err, files) => {
+        err ? res.status(400).send(err) :
+            res.json(PaginationService.paginate(files, page, limit))
+    }
+
+    gfs.files.find(fileOwner).toArray(cbFindFile)
+
+}
+
+
+
+
+
 
 export const deactivateFile = (req, res) => {
 
@@ -157,7 +192,7 @@ export const updateSharedUser = (req, res) => {
                 err ? reject("error on updating metadata") : resolve({
                     message: "updated shared users"
                 })
-
+ 
             gfs.files.update({
                 filename: data.filename
             }, {
@@ -166,6 +201,7 @@ export const updateSharedUser = (req, res) => {
 
         })
     }
+
     const config = {
         bucket: req.body.bucket,
         filename: req.body.filename,

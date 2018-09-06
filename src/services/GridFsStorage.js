@@ -22,6 +22,7 @@ const storage = new GridFsStorage({
       let bucketName = req.query.bucket
       let ownerId = req.query.id
       let tag = req.query.tag
+      let name = req.query.name
   
       
  
@@ -38,6 +39,7 @@ const storage = new GridFsStorage({
                 filename: filename,
                 metadata: {
                   owner: ownerId,
+                  name: name,
                   tag: tag,
                   isDeleted: false,
                   sharedUser: []

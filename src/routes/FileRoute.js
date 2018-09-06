@@ -18,6 +18,8 @@ const router = express.Router()
 // router.get('/', FileStream.findAll)
 router.get('/', FileStream.findAllFilesByOwner)
 
+router.get('/sharedFile', FileStream.findAllSharedFilesByUserId)
+
 router.get('/delete', FileStream.deactivateFile)
 
 router.get('/signature/:filename', FileStream.findOne(keys.BUCKET.SIGNATURE) )
@@ -33,7 +35,7 @@ router.post( "/",
     FileController.sendResponse
 )
 
-router.put( "/",
+router.put( "/sharedUser",
     FileValidator.validateUpdateSharedUser,
     FileStream.updateSharedUser
 )
