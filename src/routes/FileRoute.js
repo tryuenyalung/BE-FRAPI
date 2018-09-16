@@ -35,9 +35,9 @@ router.post( "/",
     FileController.sendResponse
 )
 
-router.put( "/sharedUser",
-    FileValidator.validateUpdateSharedUser,
-    FileStream.updateSharedUser
+router.put( "/",
+    FileValidator.validateFileUpdate,
+    FileStream.updateFile
 )
 
 // router.put(

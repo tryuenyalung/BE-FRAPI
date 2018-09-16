@@ -85,12 +85,14 @@ export const findAllFilesByOwner = (req, res) => {
     const limit = req.query.limit
     const bucket = req.query.bucket
     const tag = req.query.tag
+    const name = req.query.name
     const owner_id = req.query.id
 
     gfs.collection(bucket)
 
     const fileOwner = {
         'metadata.owner': owner_id,
+        'metadata.name': new RegExp(name, 'i'),
         'metadata.tag': new RegExp(tag, 'i'),
         'metadata.isDeleted': false
     }
@@ -110,12 +112,13 @@ export const findAllSharedFilesByUserId = (req, res) => {
     const limit = req.query.limit
     const bucket = req.query.bucket
     const tag = req.query.tag
+    const name = req.query.name
     const sharedUser_id = req.query.id
-
     gfs.collection(bucket)
 
     const fileOwner = {
         'metadata.tag': new RegExp(tag, 'i'),
+        'metadata.name': new RegExp(name, 'i'),
         'metadata.sharedUser': { 
              $elemMatch:{
                 //any record on arrays of object containing the id will be displayed
@@ -181,14 +184,14 @@ export const deactivateFile = (req, res) => {
 }
 
 
-export const updateSharedUser = (req, res) => {
+export const updateFile = (req, res) => {
     //PROMISE
-    const updatingSharedUser = (data) => {
+    const updatingFile = (data) => {
         return new Promise((resolve, reject) => {
 
             gfs.collection(data.bucket)
 
-            const cbUpdateSharedUser = (err, updated) =>
+            const cbUpdateFile = (err, updated) =>
                 err ? reject("error on updating metadata") : resolve({
                     message: "updated shared users"
                 })
@@ -197,7 +200,7 @@ export const updateSharedUser = (req, res) => {
                 filename: data.filename
             }, {
                 $set: data.UPDATE_METADATA
-            }, cbUpdateSharedUser)
+            }, cbUpdateFile)
 
         })
     }
@@ -206,11 +209,13 @@ export const updateSharedUser = (req, res) => {
         bucket: req.body.bucket,
         filename: req.body.filename,
         UPDATE_METADATA: {
-            'metadata.sharedUser': req.body.sharedUser
+            'metadata.sharedUser': req.body.sharedUser,
+            'metadata.name': req.body.name,
+            'metadata.tag': req.body.tag
         }
     }
 
-    return updatingSharedUser(config)
+    return updatingFile(config)
         .then(x => res.status(200).send(x))
         .catch(err => res.status(400).send(err))
 

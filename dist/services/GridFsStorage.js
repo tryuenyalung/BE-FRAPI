@@ -43,6 +43,7 @@ var storage = new _multerGridfsStorage2.default({
     var bucketName = req.query.bucket;
     var ownerId = req.query.id;
     var tag = req.query.tag;
+    var name = req.query.name;
 
     return new Promise(function (resolve, reject) {
 
@@ -58,6 +59,7 @@ var storage = new _multerGridfsStorage2.default({
           filename: filename,
           metadata: {
             owner: ownerId,
+            name: name,
             tag: tag,
             isDeleted: false,
             sharedUser: []

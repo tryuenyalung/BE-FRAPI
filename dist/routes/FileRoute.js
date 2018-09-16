@@ -43,6 +43,8 @@ var router = _express2.default.Router();
 // router.get('/', FileStream.findAll)
 router.get('/', FileStream.findAllFilesByOwner);
 
+router.get('/sharedFile', FileStream.findAllSharedFilesByUserId);
+
 router.get('/delete', FileStream.deactivateFile);
 
 router.get('/signature/:filename', FileStream.findOne(_keys2.default.BUCKET.SIGNATURE));
@@ -56,7 +58,7 @@ router.post("/",
 // FileController.validateFile,
 FileUpload.upload.single('file'), FileController.sendResponse);
 
-router.put("/", FileValidator.validateUpdateSharedUser, FileStream.updateSharedUser);
+router.put("/", FileValidator.validateFileUpdate, FileStream.updateFile);
 
 // router.put(
 //     '/:id', 

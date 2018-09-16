@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
     value: true
 });
-exports.findAll = exports.updateSharedUser = exports.deactivateFile = exports.findAllFilesByOwner = exports.findOne = undefined;
+exports.findAll = exports.updateFile = exports.deactivateFile = exports.findAllSharedFilesByUserId = exports.findAllFilesByOwner = exports.findOne = undefined;
 
 var _mongoose = require('mongoose');
 
@@ -58,7 +58,9 @@ var findOne = exports.findOne = function findOne(bucket) {
 
     return function (req, res) {
 
-        var fileName = { filename: req.params.filename };
+        var fileName = {
+            filename: req.params.filename
+        };
 
         gfs.collection(bucket);
 
@@ -108,13 +110,44 @@ var findAllFilesByOwner = exports.findAllFilesByOwner = function findAllFilesByO
     var limit = req.query.limit;
     var bucket = req.query.bucket;
     var tag = req.query.tag;
+    var name = req.query.name;
     var owner_id = req.query.id;
 
     gfs.collection(bucket);
 
     var fileOwner = {
         'metadata.owner': owner_id,
+        'metadata.name': new RegExp(name, 'i'),
         'metadata.tag': new RegExp(tag, 'i'),
+        'metadata.isDeleted': false
+    };
+
+    var cbFindFile = function cbFindFile(err, files) {
+        err ? res.status(400).send(err) : res.json(PaginationService.paginate(files, page, limit));
+    };
+
+    gfs.files.find(fileOwner).toArray(cbFindFile);
+};
+
+var findAllSharedFilesByUserId = exports.findAllSharedFilesByUserId = function findAllSharedFilesByUserId(req, res) {
+    var page = req.query.page;
+    var limit = req.query.limit;
+    var bucket = req.query.bucket;
+    var tag = req.query.tag;
+    var name = req.query.name;
+    var sharedUser_id = req.query.id;
+    gfs.collection(bucket);
+
+    var fileOwner = {
+        'metadata.tag': new RegExp(tag, 'i'),
+        'metadata.name': new RegExp(name, 'i'),
+        'metadata.sharedUser': {
+            $elemMatch: {
+                //any record on arrays of object containing the id will be displayed
+                id: sharedUser_id
+            }
+        },
+
         'metadata.isDeleted': false
     };
 
@@ -150,43 +183,56 @@ var deactivateFile = exports.deactivateFile = function deactivateFile(req, res) 
             gfs.collection(data.queryString.bucket);
 
             var cbDeactivateFile = function cbDeactivateFile(err, updated) {
-                return err ? reject("error on updating metadata") : resolve({ message: "file deactivated" });
+                return err ? reject("error on updating metadata") : resolve({
+                    message: "file deactivated"
+                });
             };
 
-            gfs.files.update({ filename: data.queryString.filename }, { $set: data.UPDATE_METADATA }, cbDeactivateFile);
+            gfs.files.update({
+                filename: data.queryString.filename
+            }, {
+                $set: data.UPDATE_METADATA
+            }, cbDeactivateFile);
         });
     };
 };
 
-var updateSharedUser = exports.updateSharedUser = function updateSharedUser(req, res) {
+var updateFile = exports.updateFile = function updateFile(req, res) {
+    //PROMISE
+    var updatingFile = function updatingFile(data) {
+        return new Promise(function (resolve, reject) {
+
+            gfs.collection(data.bucket);
+
+            var cbUpdateFile = function cbUpdateFile(err, updated) {
+                return err ? reject("error on updating metadata") : resolve({
+                    message: "updated shared users"
+                });
+            };
+
+            gfs.files.update({
+                filename: data.filename
+            }, {
+                $set: data.UPDATE_METADATA
+            }, cbUpdateFile);
+        });
+    };
 
     var config = {
         bucket: req.body.bucket,
         filename: req.body.filename,
         UPDATE_METADATA: {
-            'metadata.sharedUser': req.body.sharedUser
+            'metadata.sharedUser': req.body.sharedUser,
+            'metadata.name': req.body.name,
+            'metadata.tag': req.body.tag
         }
     };
 
-    updatingSharedUser(config).then(function (x) {
+    return updatingFile(config).then(function (x) {
         return res.status(200).send(x);
     }).catch(function (err) {
         return res.status(400).send(err);
     });
-
-    //PROMISE
-    var updatingSharedUser = function updatingSharedUser(data) {
-        return new Promise(function (resolve, reject) {
-
-            gfs.collection(data.bucket);
-
-            var cbUpdateSharedUser = function cbUpdateSharedUser(err, updated) {
-                return err ? reject("error on updating metadata") : resolve({ message: "updated shared users" });
-            };
-
-            gfs.files.update({ filename: data.filename }, { $set: data.UPDATE_METADATA }, cbUpdateSharedUser);
-        });
-    };
 };
 
 //REUSABLE PROMISE
@@ -200,7 +246,9 @@ var validatingQueryString = function validatingQueryString(data) {
             if (x in data.queryString === false) msg = ' ' + (msg + x) + ', ';
         });
 
-        !_lodash2.default.isEmpty(msg) ? reject({ "error": 'missing query strings :' + msg }) : resolve(data);
+        !_lodash2.default.isEmpty(msg) ? reject({
+            "error": 'missing query strings :' + msg
+        }) : resolve(data);
     });
 };
 
