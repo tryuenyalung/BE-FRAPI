@@ -34,7 +34,7 @@ let getExtForBucket = (fileExt) => {
 export const findOne = (bucket) => {
 
     return (req, res) => {
-
+        
         const fileName = {
             filename: req.params.filename
         }
@@ -43,6 +43,8 @@ export const findOne = (bucket) => {
 
         const cbFindFile = (err, file) => {
             const readstream = gfs.createReadStream(fileName)
+             
+            res.setHeader('Content-Type', file.contentType)
             // return error msg
             // readstream.on('error', (err) => res.status(404).send(keys.FILE_ERR_MSG))
             readstream.on('error', (err) => res.status(404).send(keys.FILE_ERR_MSG))

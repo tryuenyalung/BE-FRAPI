@@ -1,6 +1,6 @@
 export default {
 
-    "LOCAL_PORT": 5000,
+    "LOCAL_PORT": 4000,
 
     "SECRET": "10bjklnasldknoai0981y2laskdn",
     "USERS_DB": "mongodb://root:admin1@ds113522.mlab.com:13522/frepo",
@@ -37,7 +37,8 @@ export default {
         "SIGNATURE": "signature",
         "DOCUMENT": "document",
         "SPREADSHEET": "spreadsheet",
-        "PRESENTATION": "presentation"
+        "PRESENTATION": "presentation",
+        "PDF": "pdf"
     },
     
     "FILE_EXT_LIST": {
